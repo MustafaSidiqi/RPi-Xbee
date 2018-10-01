@@ -1,0 +1,4 @@
+﻿  VisualGDB: Sending 1 updated source file to build machine...
+  VisualGDB: Run "make CONFIG=Debug" in directory "/tmp/VisualGDB/c/Workspace/NonCanonical/NonCanonical" on pi@192.168.240.193 (SSH)
+  g++ -ggdb -ffunction-sections -O0   -DDEBUG=1  -c NonCanonical.cpp -o Debug/NonCanonical.o -MD -MF Debug/NonCanonical.dep
+  g++ -o Debug/NonCanonical -Wl,-gc-sections    -Wl,--start-group Debug/NonCanonical.o   -Wl,--rpath='$ORIGIN'   -Wl,--end-group
