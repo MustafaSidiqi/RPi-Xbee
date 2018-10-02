@@ -1,0 +1,20 @@
+﻿  Validating sources
+  Copying sources remotely to '192.168.3.245'
+  Validating architecture
+  Starting remote build
+  Compiling sources:
+  main.cpp
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(39,7): warning : unused variable ‘packageOn’ [-Wunused-variable]
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(39,7): warning :   char packageOn[50] = { 0x7E, 0x00, 0x10, 0x17, 0x01, 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49, 0xFF, 0xFE, 0x02, 0x44, 0x38, 0x05, 0x34 };
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(39,7): warning :        ^
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(122,12): warning : conversion to ‘char’ from ‘int’ may alter its value [-Wconversion]
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(122,12): warning :      ChkSum -= packageRead[i+3];
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(122,12): warning :             ^
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(160,1): warning : no return statement in function returning non-void [-Wreturn-type]
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(160,1): warning :  }
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(160,1): warning :  ^
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(72,1): warning : control reaches end of non-void function [-Wreturn-type]
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(72,1): warning :  }
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(72,1): warning :  ^
+  Linking objects
+  NonCanonicalv2.vcxproj -> C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\bin\ARM\Debug\NonCanonicalv2.out

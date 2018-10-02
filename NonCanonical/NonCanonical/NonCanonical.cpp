@@ -8,6 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <iostream>
+
 #define BAUDRATE B9600
 #define MODEMDEVICE "/dev/ttyAMA0"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
@@ -74,5 +75,6 @@ volatile int READ_STOP = FALSE;
 
 		 }		
 	 }
+	 int tester = 123;
 	tcsetattr(fd,TCSANOW,&oldtio);
 }

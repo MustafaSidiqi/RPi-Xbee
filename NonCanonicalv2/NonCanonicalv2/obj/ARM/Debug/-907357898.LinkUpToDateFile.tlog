@@ -1,0 +1,1 @@
+g++ -o "/home/pi/projects/NonCanonicalv2/bin/ARM/Debug/NonCanonicalv2.out" -Wl,--no-undefined -Wl,-z,relro -Wl,-z,now -Wl,-z,noexecstack /home/pi/projects/NonCanonicalv2/obj/ARM/Debug/main.o

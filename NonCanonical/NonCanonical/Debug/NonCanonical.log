@@ -1,4 +1,3 @@
-﻿  VisualGDB: Sending 1 updated source file to build machine...
-  VisualGDB: Run "make CONFIG=Debug" in directory "/tmp/VisualGDB/c/Workspace/NonCanonical/NonCanonical" on pi@192.168.240.193 (SSH)
-  g++ -ggdb -ffunction-sections -O0   -DDEBUG=1  -c NonCanonical.cpp -o Debug/NonCanonical.o -MD -MF Debug/NonCanonical.dep
-  g++ -o Debug/NonCanonical -Wl,-gc-sections    -Wl,--start-group Debug/NonCanonical.o   -Wl,--rpath='$ORIGIN'   -Wl,--end-group
+﻿  '"\VisualGDB.exe"' is not recognized as an internal or external command,
+  operable program or batch file.
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VC\VCTargets\Microsoft.MakeFile.Targets(44,5): error MSB3073: The command ""\VisualGDB.exe" /build "C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonical\NonCanonical\NonCanonical.vcxproj" "/solution:C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonical\NonCanonical.sln" "/config:Debug" "/platform:Win32"" exited with code 9009.
