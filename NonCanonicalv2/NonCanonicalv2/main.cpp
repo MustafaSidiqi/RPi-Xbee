@@ -24,35 +24,60 @@ volatile int STOP = FALSE;
 volatile int READ_STOP = FALSE;
 volatile int READ_ERROR = FALSE;
 volatile int fd, c, res;
-volatile char buf[255];
 struct termios oldtio, newtio;
 
+char API_Start_delimitter = 0x7E;
+char XBeeID_LED[8] = { 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49 };
+char XBeeID_Coordinator[8] = { 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x63 };
+char XBeeID_Router2[8] = { 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x51 };
+char XBeeID_VIRKER_IKKE[8] = { 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x45 };
+char packageSend[50] = {};
+char packageRead[50] = {};
+
 //Functions
-int receive();
-int initUART();
+void initUART();
+void receive();
+void send(char Start_delimitter, char mode, char *XBeeID, char *ATCommand, char *ATParameters, char ATParametersOn);
+
+
 
 
 int main()
 {
 	initUART();
+	char par[4];
 
 	char packageOn[50] = { 0x7E, 0x00, 0x10, 0x17, 0x01, 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49, 0xFF, 0xFE, 0x02, 0x44, 0x38, 0x05, 0x34 };
 	char packageOff[50] = { 0x7E, 0x00, 0x10, 0x17, 0x01, 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49, 0xFF, 0xFE, 0x02, 0x44, 0x38, 0x04, 0x35 };
 
-	while (STOP == FALSE) { /* loop for input */
-		int w = write(fd, packageOff, 20);
-		printf("%d\n", w);
-		usleep(1000);
-		STOP = TRUE;
-	}
-
+	//Sending Package:
+	par[0] = 0x04; // 5 = high 4 = low
+	send(0x7E, 0x17, XBeeID_LED, "D8", par, 1);
+	//reciving Answer
 	receive();
+
+	////Setting D1 to ADC
+	//par[0] = 0x02; // Set as ADC[0x02]
+	//send(0x7E, 0x17, XBeeID_LED, "D1", par, 1);
+	////reciving Answer
+	//receive();
+
+	//forcesample
+	//No par is needed
+	send(0x7E, 0x17, XBeeID_LED, "IS", par, 1);
+	//reciving Answer
+	receive();
+
+
+
+	//reciving Answer
+	//receive();
 
 	tcsetattr(fd, TCSANOW, &oldtio);
 }
 
 //Init UART communication
-int initUART()
+void initUART()
 {
 	fd = open(MODEMDEVICE, O_RDWR | O_NOCTTY);
 	if (fd < 0) { perror(MODEMDEVICE); exit(1); }
@@ -72,12 +97,10 @@ int initUART()
 }
 
 //Recive return Package
-int receive()
+void receive()
 {
 	printf("\n\nStart Reading... \n");
-	
-	char packageRead[50] = {};
-	char readTemp[2] = {};
+	char readTemp[1] = {};
 	int r = 0;
 	
 	while (READ_STOP == FALSE) {
@@ -85,7 +108,6 @@ int receive()
 		r = read(fd, readTemp, 1);
 		if (r != 1) READ_ERROR = TRUE;
 		packageRead[0] = readTemp[0];
-
 
 		//If 1. byte = startbyte 0x7e
 		if (packageRead[0] == 0x7e)
@@ -157,4 +179,186 @@ int receive()
 			}
 		}
 	}
+	printf("\n\n");
+	READ_STOP = FALSE;
 }
+
+//Send AT Command:
+void send(char Start_delimitter, char mode, char *XBeeID, char *ATCommand, char *ATParameters, char ATParametersOn)
+{
+	//mode = 0 => Remote Command API
+	//mode = 1 => AT command
+
+	int index = 0; //index of the package to be send
+	packageSend[index] = Start_delimitter;
+	index += 2; //for length bytes
+
+	//Frame Type:
+	index++;
+	packageSend[index] = mode;
+	//0x17 => Remote Command API
+	//0x08 => AT Command
+	//
+
+	//Frame ID
+	index++;
+	packageSend[index] = 0x01; //ID set to zero = no response, 
+
+	//64-bit ID added to package
+	for (int i = 0; i < 8; i++)
+	{
+		index++; //one byte added to the package to be send
+		packageSend[index] = XBeeID[i];
+	}
+
+	//16-bit address set to 0xFFFE
+	index++;
+	packageSend[index] = 0xFF;
+	index++;
+	packageSend[index] = 0xFE;
+
+	//Remote cmd. Options: if not set, Apply Changes Command (AC), must be sent
+	//bit 0: Disable ACK, bit 1: Apply Changes, bit 6, extended timeout 
+	index++;
+	packageSend[index] = 0b00000010; // = 0x02
+
+	//AT Command
+	index++;
+	packageSend[index] = ATCommand[0];
+	index++;
+	packageSend[index] = ATCommand[1];
+
+	char Command = 0;
+	if ((ATCommand[0] == 'D') && (ATCommand[1] == '0' || ATCommand[1] == '1' || ATCommand[1] == '2' || ATCommand[1] == '3' || ATCommand[1] == '4' || ATCommand[1] == '5' || ATCommand[1] == '6' || ATCommand[1] == '7' || ATCommand[1] == '8')) Command = 1;
+	if ((ATCommand[0] == 'P') && (ATCommand[1] == '0' || ATCommand[1] == '1' || ATCommand[1] == '2' || ATCommand[1] == '3')) Command = 2;
+	if (ATCommand[0] == 'I' && ATCommand[1] == 'R') Command = 3;
+	if (ATCommand[0] == 'I' && ATCommand[1] == 'C') Command = 4;
+	if (ATCommand[0] == 'I' && ATCommand[1] == 'S') Command = 5;
+
+	//Parameter Value
+	if (ATParametersOn == 1)
+	{
+		switch (Command)
+		{
+		case 1:
+			index++;
+			packageSend[index] = ATParameters[0];
+			break;
+		case 2:
+			index++;
+			packageSend[index] = ATParameters[0];
+			break;
+		case 3:
+			index++;
+			packageSend[index] = ATParameters[0];
+			index++;
+			packageSend[index] = ATParameters[1];
+			break;
+		case 4:
+			index++;
+			packageSend[index] = ATParameters[0];
+			index++;
+			packageSend[index] = ATParameters[1];
+			break;
+		case 5:
+			//index -= 2;
+			//packageSend[index] = ATParameters[0];
+
+			//index++;
+			//packageSend[index] = ATCommand[0];
+			//index++;
+			//packageSend[index] = ATCommand[1];
+			break;
+		default:
+			break; //error
+		}
+	}
+	//Parameter Value
+	//index++;
+	//packageSend[index] = ATParameters[0];
+	//index++;
+	//packageSend[index] = ATParameters[1];
+
+
+	//there is 3 std. bytes always: 1 start, 2 length (chksum not yet added) and index starts from 0 therefor +1.
+	packageSend[1] = (index - 3 + 1) >> 8;
+	packageSend[2] = index - 3 + 1;
+
+	//Checksum
+	int length = (packageSend[1] << 8) + packageSend[2];
+	index++;
+	//calculating checksum
+	packageSend[index] = 0xFF;
+	for (int i = 0; i < length; i++) {
+		packageSend[index] -= packageSend[i + 3];
+	}
+
+
+
+	//Printing Package:
+	printf("Package to be send: \n");
+	for (int i = 0; i < index+1; i++)
+	{
+		printf("%x ", packageSend[i]);
+	}
+	printf("\n");
+
+	//Sending Package
+	int w = write(fd, packageSend, index + 1);
+	printf("Bytes send: %d\n", w);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//// Gammel Kode:
+
+
+	//while (STOP == FALSE) { /* loop for input */
+	//	int w = write(fd, packageOn, 20);
+	//	printf("%d\n", w);
+	//	usleep(1000);
+	//	STOP = TRUE;
+	//}
+
+
+	//while (STOP == FALSE)
+	//{
+	//	par[0] = 0x05; // on
+	//	send(0x7E, 0, XBeeID_LED, "D8", par);
+
+	//	usleep(10000000);
+
+	//	par[0] = 0x04; // off
+	//	send(0x7E, 0, XBeeID_LED, "D8", par);
+	//}
+
+//// 
+
+	////Setting DIO0 as Analog Input Output
+	//par[0] = 0x00; //Selection of DIO0
+	//par[1] = 0x02;
+	//send(0x7E, 0x17, XBeeID_LED, "IC", par, 1);
+	////reciving Answer
+	//receive();
+
+	////Setting SampleRate
+	//par[0] = 0x64; //Samplerate
+	//send(0x7E, 0x17, XBeeID_LED, "IR", par, 1);
+	////reciving Answer
+	//receive();
