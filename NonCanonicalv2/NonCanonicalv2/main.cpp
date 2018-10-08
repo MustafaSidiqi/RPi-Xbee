@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 
@@ -16,8 +17,9 @@ using namespace std;
 #define BAUDRATE B9600
 #define MODEMDEVICE "/dev/ttyAMA0"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
-#define FALSE 0
+#define FALSE 02
 #define TRUE 1
+
 
 //Global Variables
 volatile int STOP = FALSE;
@@ -33,6 +35,7 @@ char XBeeID_Router2[8] = { 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x51 };
 char XBeeID_VIRKER_IKKE[8] = { 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x45 };
 char packageSend[50] = {};
 char packageRead[50] = {};
+int packageReadLength = 0;
 
 //Functions
 void initUART();
@@ -40,38 +43,57 @@ void receive();
 void send(char Start_delimitter, char mode, char *XBeeID, char *ATCommand, char *ATParameters, char ATParametersOn);
 
 
-
-
 int main()
 {
 	initUART();
 	char par[4];
 
-	char packageOn[50] = { 0x7E, 0x00, 0x10, 0x17, 0x01, 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49, 0xFF, 0xFE, 0x02, 0x44, 0x38, 0x05, 0x34 };
-	char packageOff[50] = { 0x7E, 0x00, 0x10, 0x17, 0x01, 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49, 0xFF, 0xFE, 0x02, 0x44, 0x38, 0x04, 0x35 };
+	//char packageOn[50] = { 0x7E, 0x00, 0x10, 0x17, 0x01, 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49, 0xFF, 0xFE, 0x02, 0x44, 0x38, 0x05, 0x34 };
+	//char packageOff[50] = { 0x7E, 0x00, 0x10, 0x17, 0x01, 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49, 0xFF, 0xFE, 0x02, 0x44, 0x38, 0x04, 0x35 };
 
-	//Sending Package:
-	par[0] = 0x04; // 5 = high 4 = low
-	send(0x7E, 0x17, XBeeID_LED, "D8", par, 1);
-	//reciving Answer
-	receive();
-
-	////Setting D1 to ADC
-	//par[0] = 0x02; // Set as ADC[0x02]
-	//send(0x7E, 0x17, XBeeID_LED, "D1", par, 1);
-	////reciving Answer
+	//LED CONTROL:
+	//par[0] = 0x04; // 5 = high 4 = low
+	//send(0x7E, 0x17, XBeeID_LED, "D8", par, 1);
 	//receive();
 
-	//forcesample
-	//No par is needed
-	send(0x7E, 0x17, XBeeID_LED, "IS", par, 1);
-	//reciving Answer
-	receive();
-
-
-
-	//reciving Answer
+	//par[0] = 0x05; // 5 = high 4 = low
+	//send(0x7E, 0x17, XBeeID_LED, "D8", par, 1);
 	//receive();
+	
+	for (int i = 0; i < 20; i++)
+	{
+		printf("---------- ADC SAMPLE: ----------\n");
+		send(0x7E, 0x17, XBeeID_LED, "IS", par, 1); //forcesample
+		receive();
+		
+		int ADCData = (packageRead[packageReadLength - 3] << 8) + packageRead[packageReadLength - 2];
+
+		printf("---------- BATTERY POWER: ----------\n");
+		send(0x7E, 0x17, XBeeID_LED, "%V", par, 1); //Battery Voltage
+		receive();
+		
+
+
+		double A = 0.003354016;
+		double B = 0.0002569850;
+		double C = 0.000002620131;
+		double Vd1 = ((packageRead[packageReadLength - 3] << 8) + packageRead[packageReadLength - 2])*(1.2/1024);
+
+		double Vd2 = ADCData * (1.2 / 1024);
+
+		double R1 = 47500;
+		double Rt = 10000;
+		double I = (Vd1 - Vd2) / R1;
+		double Rntc = Vd2 / I;
+
+		double T = 1 / (A + B*log(Rntc / Rt) + pow(C*log(Rntc / Rt),2));
+
+		printf("\n Temperatur: %f\n", T-273.15);
+
+	}
+
+
+	//reciving Answer	//receive();
 
 	tcsetattr(fd, TCSANOW, &oldtio);
 }
@@ -99,7 +121,7 @@ void initUART()
 //Recive return Package
 void receive()
 {
-	printf("\n\nStart Reading... \n");
+	printf("\nStart Reading... \t");
 	char readTemp[1] = {};
 	int r = 0;
 	
@@ -127,6 +149,7 @@ void receive()
 
 			//Calculating length of package
 			int length = (packageRead[1] << 8) + packageRead[2];
+			packageReadLength = length+4;
 			printf("Package length: %d\n\n", length);
 			//Reading rest of package
 			for (int i = 0; i < (length + 1); i++) {
@@ -156,7 +179,7 @@ void receive()
 			printf("\n");
 
 			//Finding status from package:
-			switch (packageRead[length+2])
+			switch (packageRead[17])
 			{
 			case 0: 
 				printf("Status: OK \n");
@@ -179,13 +202,15 @@ void receive()
 			}
 		}
 	}
-	printf("\n\n");
+	printf("\n");
 	READ_STOP = FALSE;
+	
 }
 
 //Send AT Command:
 void send(char Start_delimitter, char mode, char *XBeeID, char *ATCommand, char *ATParameters, char ATParametersOn)
 {
+	usleep(5000000);
 	//mode = 0 => Remote Command API
 	//mode = 1 => AT command
 
@@ -234,6 +259,7 @@ void send(char Start_delimitter, char mode, char *XBeeID, char *ATCommand, char 
 	if (ATCommand[0] == 'I' && ATCommand[1] == 'R') Command = 3;
 	if (ATCommand[0] == 'I' && ATCommand[1] == 'C') Command = 4;
 	if (ATCommand[0] == 'I' && ATCommand[1] == 'S') Command = 5;
+	if (ATCommand[0] == '%' && ATCommand[1] == 'V') Command = 6;
 
 	//Parameter Value
 	if (ATParametersOn == 1)
@@ -261,24 +287,13 @@ void send(char Start_delimitter, char mode, char *XBeeID, char *ATCommand, char 
 			packageSend[index] = ATParameters[1];
 			break;
 		case 5:
-			//index -= 2;
-			//packageSend[index] = ATParameters[0];
-
-			//index++;
-			//packageSend[index] = ATCommand[0];
-			//index++;
-			//packageSend[index] = ATCommand[1];
+			break;
+		case 6:
 			break;
 		default:
 			break; //error
 		}
 	}
-	//Parameter Value
-	//index++;
-	//packageSend[index] = ATParameters[0];
-	//index++;
-	//packageSend[index] = ATParameters[1];
-
 
 	//there is 3 std. bytes always: 1 start, 2 length (chksum not yet added) and index starts from 0 therefor +1.
 	packageSend[1] = (index - 3 + 1) >> 8;
@@ -306,7 +321,6 @@ void send(char Start_delimitter, char mode, char *XBeeID, char *ATCommand, char 
 	//Sending Package
 	int w = write(fd, packageSend, index + 1);
 	printf("Bytes send: %d\n", w);
-
 }
 
 
@@ -360,5 +374,11 @@ void send(char Start_delimitter, char mode, char *XBeeID, char *ATCommand, char 
 	////Setting SampleRate
 	//par[0] = 0x64; //Samplerate
 	//send(0x7E, 0x17, XBeeID_LED, "IR", par, 1);
+	////reciving Answer
+	//receive();
+
+	////Setting D1 to ADC
+	//par[0] = 0x02; // Set as ADC[0x02]
+	//send(0x7E, 0x17, XBeeID_LED, "D1", par, 1);
 	////reciving Answer
 	//receive();

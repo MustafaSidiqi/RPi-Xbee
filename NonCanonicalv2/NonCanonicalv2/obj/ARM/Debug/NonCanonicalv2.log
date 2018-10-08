@@ -1,3 +1,29 @@
 ﻿  Validating sources
-  Copying sources remotely to '192.168.3.245'
-C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VC\VCTargets\Application Type\Linux\1.0\Linux.targets(157,5): error : Could not connect to the remote system. Please verify your connection settings, and that your machine is on the network and reachable.
+  Copying sources remotely to '192.168.240.193'
+  Validating architecture
+  Starting remote build
+  Compiling sources:
+  main.cpp
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(65,43): warning : deprecated conversion from string constant to ‘char*’ [-Wwrite-strings]
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(65,43): warning :   send(0x7E, 0x17, XBeeID_LED, "D2", par, 1);
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(65,43): warning :                                            ^
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(71,44): warning : deprecated conversion from string constant to ‘char*’ [-Wwrite-strings]
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(71,44): warning :    send(0x7E, 0x17, XBeeID_LED, "IS", par, 1); //forcesample
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(71,44): warning :                                             ^
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(77,44): warning : deprecated conversion from string constant to ‘char*’ [-Wwrite-strings]
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(77,44): warning :    send(0x7E, 0x17, XBeeID_LED, "%V", par, 1); //Battery Voltage
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(77,44): warning :                                             ^
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(172,12): warning : conversion to ‘char’ from ‘int’ may alter its value [-Wconversion]
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(172,12): warning :      ChkSum -= packageRead[i+3];
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(172,12): warning :             ^
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(304,17): warning : conversion to ‘char’ from ‘int’ may alter its value [-Wconversion]
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(304,17): warning :   packageSend[1] = (index - 3 + 1) >> 8;
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(304,17): warning :                  ^
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(305,17): warning : conversion to ‘char’ from ‘int’ may alter its value [-Wconversion]
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(305,17): warning :   packageSend[2] = index - 3 + 1;
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(305,17): warning :                  ^
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(313,22): warning : conversion to ‘char’ from ‘int’ may alter its value [-Wconversion]
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(313,22): warning :    packageSend[index] -= packageSend[i + 3];
+C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\main.cpp(313,22): warning :                       ^
+  Linking objects
+  NonCanonicalv2.vcxproj -> C:\Users\Bruger\Documents\GitHub\RPi-Xbee\NonCanonicalv2\NonCanonicalv2\bin\ARM\Debug\NonCanonicalv2.out
