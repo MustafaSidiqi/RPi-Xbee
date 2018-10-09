@@ -48,18 +48,7 @@ int main()
 	initUART();
 	char par[4];
 
-	//char packageOn[50] = { 0x7E, 0x00, 0x10, 0x17, 0x01, 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49, 0xFF, 0xFE, 0x02, 0x44, 0x38, 0x05, 0x34 };
-	//char packageOff[50] = { 0x7E, 0x00, 0x10, 0x17, 0x01, 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49, 0xFF, 0xFE, 0x02, 0x44, 0x38, 0x04, 0x35 };
 
-	//LED CONTROL:
-	//par[0] = 0x04; // 5 = high 4 = low
-	//send(0x7E, 0x17, XBeeID_LED, "D8", par, 1);
-	//receive();
-
-	//par[0] = 0x05; // 5 = high 4 = low
-	//send(0x7E, 0x17, XBeeID_LED, "D8", par, 1);
-	//receive();
-	
 	for (int i = 0; i < 20; i++)
 	{
 		printf("---------- ADC SAMPLE: ----------\n");
@@ -86,10 +75,25 @@ int main()
 		double I = (Vd1 - Vd2) / R1;
 		double Rntc = Vd2 / I;
 
-		double T = 1 / (A + B*log(Rntc / Rt) + pow(C*log(Rntc / Rt),2));
+		double T = (1 / (A + B*log(Rntc / Rt) + pow(C*log(Rntc / Rt),2)))-273.15;
 
-		printf("\n Temperatur: %f\n", T-273.15);
+		printf("\n Temperatur: %f\n", T);
 
+		if (T > 25)
+		{
+			printf("---------- AC ON ----------\n");
+			//LED CONTROL:
+			par[0] = 0x05; // 5 = high 4 = low
+			send(0x7E, 0x17, XBeeID_LED, "D8", par, 1);
+			receive();
+		}
+		else
+		{
+			printf("---------- AC OFF ----------\n");
+			par[0] = 0x04; // 5 = high 4 = low
+			send(0x7E, 0x17, XBeeID_LED, "D8", par, 1);
+			receive();
+		}
 	}
 
 
@@ -121,7 +125,7 @@ void initUART()
 //Recive return Package
 void receive()
 {
-	printf("\nStart Reading... \t");
+	printf("\nStart Reading... \n");
 	char readTemp[1] = {};
 	int r = 0;
 	
@@ -382,3 +386,7 @@ void send(char Start_delimitter, char mode, char *XBeeID, char *ATCommand, char 
 	//send(0x7E, 0x17, XBeeID_LED, "D1", par, 1);
 	////reciving Answer
 	//receive();
+
+
+	//char packageOn[50] = { 0x7E, 0x00, 0x10, 0x17, 0x01, 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49, 0xFF, 0xFE, 0x02, 0x44, 0x38, 0x05, 0x34 };
+	//char packageOff[50] = { 0x7E, 0x00, 0x10, 0x17, 0x01, 0x00, 0x13, 0xA2, 0x00, 0x41, 0x6B, 0x89, 0x49, 0xFF, 0xFE, 0x02, 0x44, 0x38, 0x04, 0x35 };
